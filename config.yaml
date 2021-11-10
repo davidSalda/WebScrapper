@@ -3,9 +3,9 @@ news_sites:
   xataka:
     url: https://www.xataka.com.mx
     queries:
-      homepage_article_links: '.content-container a'
-      article_body: '.aricle contend'
-      article_title: '.artilce hear h1'
+      homepage_article_links: '.base-asset-image a'
+      article_body: '.article-content'
+      article_title: '.article-header header h1 span'
       
 
   eluniversal:
