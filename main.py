@@ -29,6 +29,14 @@ def _news_scraper(news_site_vid):
             print(article.title)
     print(len(articles))
 
+def _build_link(host, link):
+    if is_well_formed_link.match(link):
+        return link
+    elif is_root_path.match(link):
+        return f'{host}{link}'
+    else:
+        return f'{host}/{link}'
+
 def _fetch_article(news_site_vid, host, link):
     logger.info(f'Start fetching article at {link}')
 
@@ -56,10 +64,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
     _news_scraper(args.news_site) 
 
-def _build_link(host, link):
-    if is_well_formed_link.match(link):
-        return link
-    elif is_root_path.match(link):
-        return f'{host}{link}'
-    else:
-        return f'{host}/{link}'
