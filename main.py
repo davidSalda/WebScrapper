@@ -1,6 +1,9 @@
 import argparse
 import logging
 import re
+import datetime
+import csv
+
 logging.basicConfig(level=logging.INFO)
 
 import news_page_objects as news
@@ -13,21 +16,37 @@ is_root_path = re.compile(r'^/.+$')
 
 logger = logging.getLogger(__name__)
 
-def _news_scraper(news_site_vid):
-    host = config()['news_sites'][news_site_vid]['url']
+def _news_scraper(news_site_uid):
+    host = config()['news_sites'][news_site_uid]['url']
 
     logging.info(f'Beginning scrape for {host}')
-    homepage = news.HomePage(news_site_vid, host)
+    homepage = news.HomePage(news_site_uid, host)
 
     articles = []
     for link in homepage.article_links:
-        article = _fetch_article(news_site_vid, host, link)
+        article = _fetch_article(news_site_uid, host, link)
 
         if article:
             logger.info('Article fetched!!')
             articles.append(article)
-            print(article.title)
-    print(len(articles))
+            #print(article.title)
+    #print(len(articles))
+    _save_articles(news_site_uid, articles)
+
+def _save_articles(news_site_uid, articles):
+    now = datetime.datetime.now().strftime('%Y_%m_%d')
+    out_file_name = f'{news_site_uid}_{now}_articles.csv'
+
+    csv_headers = list(filter(lambda property: not property.startswith('_'), dir(articles[0])))
+
+    with open(out_file_name, mode='w+', encoding='utf-8') as f:
+        writer = csv.writer(f)
+        writer.writerow(csv_headers)
+
+        for article in articles:
+            row = [str(getattr(article, prop)) for prop in csv_headers]
+            writer.writerow(row)
+
 
 def _build_link(host, link):
     if is_well_formed_link.match(link):
@@ -36,6 +55,7 @@ def _build_link(host, link):
         return f'{host}{link}'
     else:
         return f'{host}/{link}'
+
 
 def _fetch_article(news_site_vid, host, link):
     logger.info(f'Start fetching article at {link}')
@@ -52,6 +72,8 @@ def _fetch_article(news_site_vid, host, link):
         return None
     return article
 
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
@@ -63,4 +85,3 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     _news_scraper(args.news_site) 
-
